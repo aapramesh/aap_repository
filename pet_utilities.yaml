@@ -1,0 +1,253 @@
+swagger: '2.0'
+info:
+  title: Adopt-a-Pet.com Pet Utilities API
+  description: The Adopt-a-Pet.com Pet Utilities API is a RESTful API for accessing fixture data for a variety of pet fields
+
+  version: "3.0.1"
+# the domain of the service
+host: api.adoptapet.com
+# array of all schemes that your API supports
+schemes:
+  - https
+# will be prefixed to all paths
+basePath: /v3
+produces:
+  - application/json
+paths:
+  /pets/families/{id}:
+    get:
+      summary: Pet Families Query
+      description: |
+        This is a supplemental API to provide the names that correspond to the IDs returned/submitted along with the pet_search and pet_details Queries for the primary_family_id and secondary_family_id Parameters/Properties.
+        
+        Adopt-a-Pet.com highly recommends that you retrieve and cache the information returned from this Query, only checking for new/updated data on a regular basis (i.e., weekly) since the data is relatively constant and does not change.
+      parameters:
+        - name: id
+          in: path
+          description: The value corresponding to a primary_family_id or secondary_family_id of a pet
+          required: true
+          type: array
+          items:
+            type: integer
+            format: int32
+      tags:
+        - basic pet utilities
+      responses:
+        200:
+          description: Because it is possible for multiple families to be returned from this API Query, the JSON response will always return an Array of Objects, even if there is only one Object returned
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/PetFamily'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /pets/colors/{id}:
+    get:
+      summary: Pet Colors Query
+      description: |
+        The Pet Colors Query shall be sent to the URL /pet_colors (relative to the Base URL defined above) with the following Query Parameters. 
+
+        This is a supplemental API to provide the colors that correspond to the IDs returned/submitted along with the pet_search and pet_details Queries for the color_id Parameters/Properties.
+
+        Adopt-a-Pet.com highly recommends that you retrieve and cache the information returned from this Query, only checking for new/updated data on a regular basis (i.e., weekly) since the data is relatively constant and does not change.
+      parameters:
+        - name: id
+          in: path
+          description: The value corresponding to a color_id of a pet
+          required: true
+          type: array
+          items:
+            type: integer
+            format: int32
+      tags:
+        - basic pet utilities
+      responses:
+        200:
+          description: Because it is possible for multiple colors to be returned from this API Query, the JSON response will always return an Array of Objects, even if there is only one Object returned
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/PetColor'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /pets/sizes/{id}:
+    get:
+      summary: Pet Size Query
+      description: |
+        The Pet Size Query shall be sent to the URL /pet_sizes (relative to the Base URL defined above) with the following Query Parameters. 
+
+      parameters:
+        - name: id
+          in: path
+          description: The value corresponding to a pet_size_range_id of a pet
+          required: true
+          type: array
+          items:
+            type: integer
+            format: int32
+      tags:
+        - basic pet utilities
+      responses:
+        200:
+          description: Because it is possible for multiple colors to be returned from this API Query, the JSON response will always return an Array of Objects, even if there is only one Object returned
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/PetSize'
+        default:
+          description: Unexpected error
+          schema:
+           $ref: '#/definitions/Error'
+  /geolocations:
+    get:
+      summary: Geolocations
+      description: |
+        Return geolocation based on ip address passed
+      tags:
+        - basic pet utilities
+      responses:
+        200:
+          description: Geolocation
+          schema:
+            type: object
+            items:
+              $ref: '#/definitions/GeoResponse'
+        default:
+          description: Unexpected error
+          schema:
+           $ref: '#/definitions/Error'
+  /geolocations/{ip}:
+    get:
+      summary: Geolocations
+      description: |
+        Return geolocation based on ip address passed
+      parameters:
+        - name: ip
+          in: path
+          description: IP to look up
+          required: true
+          type: string
+      tags:
+        - basic pet utilities
+      responses:
+        200:
+          description: Geolocation
+          schema:
+            type: object
+            items:
+              $ref: '#/definitions/GeoResponse'
+        default:
+          description: Unexpected error
+          schema:
+           $ref: '#/definitions/Error'
+  /validate:
+    get:
+      summary: Email Validation
+      description: Returns true or false to the caller
+      parameters:
+        - name: email
+          in: query
+          description: The email you wish to validate
+          required: true
+          type: string
+      tags:
+        - basic pet utilities
+      responses:
+        200:
+          description: Success
+          schema:
+            $ref: "#/definitions/EmailValidateResponse"
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+definitions:
+  PetFamily:
+    type: object
+    properties:
+      family:
+        type: integer
+        description: The ID of family
+      name:
+        type: string
+        description: The name of the family
+  PetColor:
+    type: object
+    properties:
+      color:
+        type: integer
+        description: The ID of color
+      name:
+        type: string
+        description: The name of the color
+  PetSize:
+    type: object
+    properties:
+      range:
+        type: integer
+        description: The ID of the size range
+      name:
+        type: string
+        description: The name of the size range
+  EmailValidateResponse:
+    type: object
+    properties:
+      result:
+        type: string
+      message:
+        type: string
+      # optional properties
+      autocorrect:
+        type: string
+  GeoResponse:
+    type: object
+    description: Return structure for the geolocation lookup
+    properties:
+      zip:
+        type: string
+        description: The 5 digit US ZIP code or 3 digit Canadian postal code
+      locations:
+        type: array
+        description: Locations structure containing potentially containing multiple city and state information
+        items:
+          $ref: '#/definitions/Location'
+  Location:
+    type: object
+    description: object containing individual city and state information
+    properties:
+      city:
+        type: object
+        description: City structure containing city id and city name
+        properties:
+          id:
+            type: integer
+            format: int32
+            description: City ID
+          name:
+            type: string
+            description: City for the geolocation, e.g. Richmond
+      state:
+        type: object
+        description: State code structure containing state ID and state code
+        properties:
+          id:
+            type: integer
+            format: int32
+            description: State ID
+          name:
+            type: string
+            description: Two letter state or province code for the geolocation, e.g. IN
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      msg:
+        type: string
+      details:
+        type: string
